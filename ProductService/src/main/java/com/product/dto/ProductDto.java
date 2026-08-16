@@ -19,6 +19,6 @@ public class ProductDto {
 	
 	private BrandDto brandDto;
 	
-	private List<ProductImageDto> productImageDto;
+//	private List<ProductImageDto> productImageDto;
 
 }

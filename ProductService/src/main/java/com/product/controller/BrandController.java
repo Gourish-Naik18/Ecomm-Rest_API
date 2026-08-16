@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.product.exception.AppException;
 import com.product.dto.BrandDto;
 import com.product.request.AddBrandRequest;
 import com.product.request.UpdateBrandRequest;
@@ -34,6 +37,11 @@ public class BrandController {
 	@PostMapping(value="/add",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> addBrand(@RequestParam String brandName,
 			       @RequestPart(value="image",required = false) MultipartFile image){
+//		
+//		if(result.hasErrors()) {
+//			throw new AppException(result.getFieldError().getDefaultMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+		
 		AddBrandRequest request = new AddBrandRequest();
 		request.setBrandName(brandName);
 		BrandDto dto = bservice.addBrand(request, image);
@@ -54,6 +62,11 @@ public class BrandController {
 	
 	@PutMapping(value="/update/{brandId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> updateBrand(@PathVariable Integer brandId,@RequestParam String brandName,@RequestPart(value="image",required = false) MultipartFile image){
+		
+//		if(result.hasErrors()) {
+//			throw new AppException(result.getFieldError().getDefaultMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+		
 		UpdateBrandRequest request = new UpdateBrandRequest();
 		request.setBrandName(brandName);
 		BrandDto dto = bservice.updateBrand(brandId, request, image);

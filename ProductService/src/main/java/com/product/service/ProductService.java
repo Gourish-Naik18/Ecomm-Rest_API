@@ -1,0 +1,26 @@
+package com.product.service;
+
+import java.util.List;
+
+import com.product.dto.ProductDto;
+import com.product.request.AddProductRequest;
+import com.product.request.UpdateProductRequest;
+
+public interface ProductService {
+	
+	ProductDto addProduct(AddProductRequest request);
+	
+	ProductDto getProductById(Integer productId);
+	
+	List<ProductDto> getAllProducts();
+	
+	List<ProductDto> getProductsByCategory(String categoryName);
+	
+	List<ProductDto> getProductsByBrand(String brandName);
+	
+	ProductDto updateProduct(Integer productId , UpdateProductRequest request);
+	
+	void deleteProductById(Integer productId);
+
+
+}
