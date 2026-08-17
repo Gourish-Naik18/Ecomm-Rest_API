@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.product.dto.ProductDto;
+import com.product.exception.AppException;
 import com.product.request.AddProductRequest;
 import com.product.request.UpdateProductRequest;
 import com.product.response.ApiResponse;
@@ -29,7 +32,12 @@ public class ProductController {
 	private ProductService pservice;
 	
 	@PostMapping("/add")
-	public ResponseEntity<?> addProduct(@RequestBody AddProductRequest request){
+	public ResponseEntity<?> addProduct(@Validated @RequestBody AddProductRequest request,BindingResult result){
+		
+		if(result.hasErrors()) {
+			throw new AppException(result.getFieldError().getDefaultMessage(),HttpStatus.BAD_REQUEST);
+		}
+		
 		ProductDto dto = pservice.addProduct(request);
 		return ResponseEntity.ok(new ApiResponse<>("product added sucessfully!",dto,HttpStatus.OK));
 	}
@@ -59,7 +67,12 @@ public class ProductController {
 	}
 	
 	@PutMapping("/update/{productId}")
-	public ResponseEntity<?> updateProduct(@PathVariable Integer productId,@RequestBody UpdateProductRequest request){
+	public ResponseEntity<?> updateProduct(@PathVariable Integer productId,@Validated @RequestBody UpdateProductRequest request,BindingResult result){
+		
+		if(result.hasErrors()) {
+			throw new AppException(result.getFieldError().getDefaultMessage(),HttpStatus.BAD_REQUEST);
+		}
+		
 		ProductDto dto = pservice.updateProduct(productId, request);
 		return ResponseEntity.ok(new ApiResponse<>("updated sucessfully!",dto,HttpStatus.OK));
 	}
