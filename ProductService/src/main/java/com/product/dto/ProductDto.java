@@ -1,5 +1,6 @@
 package com.product.dto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.Data;
@@ -15,10 +16,12 @@ public class ProductDto {
 	
 	private Double price;
 	
+	private LocalDateTime createdAt;
+	
 	private CategoryDto categoryDto;
 	
 	private BrandDto brandDto;
 	
-//	private List<ProductImageDto> productImageDto;
+	private List<ProductImageDto> productImageDto;
 
 }

@@ -11,6 +11,5 @@ public class ProductImageDto {
 	
 	private String publicUrl;
 	
-	private ProductDto productDto;
 
 }
