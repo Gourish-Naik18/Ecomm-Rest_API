@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.product.dto.ProductVariantDto;
+import com.product.exception.AppException;
 import com.product.request.AddProductVariantRequest;
 import com.product.request.UpdateProductVariantRequest;
 import com.product.response.ApiResponse;
@@ -28,13 +31,23 @@ public class ProductVariantController {
 	private ProductVariantService pservice;
 	
 	@PostMapping("/add/{productId}")
-	public ResponseEntity<?> addProductVariant(@PathVariable Integer productId,@RequestBody AddProductVariantRequest request){
+	public ResponseEntity<?> addProductVariant(@PathVariable Integer productId,@Validated @RequestBody AddProductVariantRequest request,BindingResult result){
+		
+		if(result.hasErrors()) {
+			throw new AppException(result.getFieldError().getDefaultMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 		ProductVariantDto dto = pservice.addProductVariant(productId, request);
 		return ResponseEntity.ok(new ApiResponse<>("variant added sucessfully!",dto,HttpStatus.OK));
 	}
 	
 	@PutMapping("/update")
-	public ResponseEntity<?> updateProductVariant(@RequestBody UpdateProductVariantRequest request){
+	public ResponseEntity<?> updateProductVariant(@Validated @RequestBody UpdateProductVariantRequest request,BindingResult result){
+		
+		if(result.hasErrors()) {
+			throw new AppException(result.getFieldError().getDefaultMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 		ProductVariantDto dto = pservice.updateProductVariant(request);
 		return ResponseEntity.ok(new ApiResponse<>("variant updated sucessfully!",dto,HttpStatus.OK));
 	}

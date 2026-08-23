@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.product.dto.AttributeValueDto;
+import com.product.exception.AppException;
 import com.product.request.AddAttributeValueRequest;
 import com.product.request.UpdateAttributeValueRequest;
 import com.product.response.ApiResponse;
@@ -28,7 +31,12 @@ public class AttributeValueController {
 	private AttributeValueService aservice;
 	
 	@PostMapping("/add")
-	public ResponseEntity<?> addAttributeValue(@RequestBody AddAttributeValueRequest request){
+	public ResponseEntity<?> addAttributeValue(@Validated @RequestBody AddAttributeValueRequest request,BindingResult result){
+		
+		if(result.hasErrors()) {
+			throw new AppException(result.getFieldError().getDefaultMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 		AttributeValueDto dto = aservice.addAttributeValue(request);
 		return ResponseEntity.ok(new ApiResponse<>("attribute value added sucessfully!",dto,HttpStatus.OK));
 	}
@@ -46,7 +54,12 @@ public class AttributeValueController {
 	}
 	
 	@PutMapping("/update/{valueId}")
-	public ResponseEntity<?> updateAttributeValue(@PathVariable Integer valueId,@RequestBody UpdateAttributeValueRequest request){
+	public ResponseEntity<?> updateAttributeValue(@PathVariable Integer valueId,@Validated @RequestBody UpdateAttributeValueRequest request,BindingResult result){
+		
+		if(result.hasErrors()) {
+			throw new AppException(result.getFieldError().getDefaultMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 		AttributeValueDto dto = aservice.updateAttributeValue(valueId, request);
 		return ResponseEntity.ok(new ApiResponse<>("attribute value updated sucessfully!",dto,HttpStatus.OK));
 	}
