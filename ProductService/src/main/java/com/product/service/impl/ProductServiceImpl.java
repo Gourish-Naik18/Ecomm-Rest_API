@@ -15,6 +15,7 @@ import com.product.dto.BrandDto;
 import com.product.dto.CategoryDto;
 import com.product.dto.ProductDto;
 import com.product.dto.ProductImageDto;
+import com.product.dto.ProductVariantDto;
 import com.product.entity.Brand;
 import com.product.entity.Category;
 import com.product.entity.Product;
@@ -24,10 +25,12 @@ import com.product.repo.BrandRepo;
 import com.product.repo.CategoryRepo;
 import com.product.repo.ProductRepo;
 import com.product.request.AddProductRequest;
+import com.product.request.AddProductVariantRequest;
 import com.product.request.UpdateProductRequest;
 import com.product.service.CloudinaryService;
 import com.product.service.ProductImageService;
 import com.product.service.ProductService;
+import com.product.service.ProductVariantService;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -50,6 +53,9 @@ public class ProductServiceImpl implements ProductService {
 	@Autowired
 	private ProductImageService pservice;
 
+	@Autowired
+	private ProductVariantService pvservice;
+
 	@Override
 	@Transactional
 	public ProductDto addProduct(AddProductRequest request, List<MultipartFile> images) {
@@ -58,8 +64,14 @@ public class ProductServiceImpl implements ProductService {
 				.orElseThrow(() -> new AppException("no brand found!", HttpStatus.NOT_FOUND));
 		Category c = crepo.findByCategoryName(request.getCategoryName())
 				.orElseThrow(() -> new AppException("no Category found!", HttpStatus.NOT_FOUND));
+		
+		if(request.getAttributes() == null || request.getAttributes().isEmpty()) {
+			throw new AppException("provide attribute pair for the variant",HttpStatus.BAD_REQUEST);
+		}
 
-		Product p = mapper.map(request, Product.class);
+		Product p = new Product();
+		p.setProductName(request.getProductName().trim());
+		p.setDescription(request.getDescription());
 		p.setBrand(b);
 		p.setCategory(c);
 
@@ -70,10 +82,22 @@ public class ProductServiceImpl implements ProductService {
 			uploaded = pservice.uploadImages(saved.getProductId(), images);
 		}
 
+		List<ProductVariantDto> variants = new ArrayList<>();
+		if (request.getPrice() != null && request.getStocks() != null) {
+			AddProductVariantRequest variantRequest = new AddProductVariantRequest();
+			variantRequest.setPrice(request.getPrice());
+			variantRequest.setStocks(request.getStocks());
+			variantRequest.setAttributes(request.getAttributes());
+
+			ProductVariantDto createdVariant = pvservice.addProductVariant(saved.getProductId(), variantRequest);
+			variants.add(createdVariant);
+		}
+
 		ProductDto dto = mapper.map(saved, ProductDto.class);
 		dto.setBrandDto(mapper.map(b, BrandDto.class));
 		dto.setCategoryDto(mapper.map(c, CategoryDto.class));
 		dto.setProductImageDto(uploaded);
+		dto.setVariants(variants);
 		return dto;
 	}
 
@@ -94,6 +118,9 @@ public class ProductServiceImpl implements ProductService {
 		} else {
 			dto.setProductImageDto(new ArrayList<>());
 		}
+
+		dto.setVariants(pvservice.getVariantsByProductId(productId));
+
 		return dto;
 	}
 
@@ -123,6 +150,8 @@ public class ProductServiceImpl implements ProductService {
 				dto.setProductImageDto(new ArrayList<>());
 			}
 
+			dto.setVariants(pvservice.getVariantsByProductId(p.getProductId()));
+
 			return dto;
 		}).collect(Collectors.toList());
 	}
@@ -148,6 +177,8 @@ public class ProductServiceImpl implements ProductService {
 			} else {
 				dto.setProductImageDto(new ArrayList<>());
 			}
+
+			dto.setVariants(pvservice.getVariantsByProductId(p.getProductId()));
 
 			return dto;
 		}).collect(Collectors.toList());
@@ -175,6 +206,8 @@ public class ProductServiceImpl implements ProductService {
 				dto.setProductImageDto(new ArrayList<>());
 			}
 
+			dto.setVariants(pvservice.getVariantsByProductId(p.getProductId()));
+
 			return dto;
 		}).collect(Collectors.toList());
 	}
@@ -190,7 +223,8 @@ public class ProductServiceImpl implements ProductService {
 		Category c = crepo.findByCategoryName(request.getCategoryName())
 				.orElseThrow(() -> new AppException("no Category found!", HttpStatus.NOT_FOUND));
 
-		mapper.map(request, p);
+		p.setProductName(request.getProductName().trim());
+		p.setDescription(request.getDescription());
 		p.setBrand(b);
 		p.setCategory(c);
 
@@ -210,6 +244,8 @@ public class ProductServiceImpl implements ProductService {
 		} else {
 			dto.setProductImageDto(new ArrayList<>());
 		}
+
+		dto.setVariants(pvservice.getVariantsByProductId(saved.getProductId()));
 
 		return dto;
 	}

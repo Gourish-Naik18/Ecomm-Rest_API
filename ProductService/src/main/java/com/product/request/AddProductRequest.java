@@ -1,5 +1,7 @@
 package com.product.request;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -23,5 +25,9 @@ public class AddProductRequest {
 	
 //	@NotBlank(message = "brand name cannot be empty")
 	private String brandName;
+	
+	private Integer stocks;
+	
+	private List<AttributeHelperRequest> attributes;
 
 }

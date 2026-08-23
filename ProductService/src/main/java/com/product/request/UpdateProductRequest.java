@@ -14,10 +14,6 @@ public class UpdateProductRequest {
 	@NotBlank(message = "description cannot be empty")
 	private String description;
 	
-	@NotNull(message = "price cannot be empty")
-	@Positive(message = "price must be greater then zero")
-	private Double price;
-	
 	@NotBlank(message = "category name cannot be empty")
 	private String categoryName;
 	

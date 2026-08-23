@@ -14,7 +14,7 @@ public class ProductDto {
 	
 	private String description;
 	
-	private Double price;
+//	private Double price;
 	
 	private LocalDateTime createdAt;
 	
@@ -23,5 +23,7 @@ public class ProductDto {
 	private BrandDto brandDto;
 	
 	private List<ProductImageDto> productImageDto;
+	
+	private List<ProductVariantDto> variants;
 
 }

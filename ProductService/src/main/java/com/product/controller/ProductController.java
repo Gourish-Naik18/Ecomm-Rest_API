@@ -1,5 +1,6 @@
 package com.product.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.product.dto.ProductDto;
+import com.product.exception.AppException;
 import com.product.request.AddProductRequest;
+import com.product.request.AttributeHelperRequest;
 import com.product.request.UpdateProductRequest;
 import com.product.response.ApiResponse;
 import com.product.service.ProductImageService;
@@ -36,18 +39,48 @@ public class ProductController {
 	private ProductImageService piservice;
 	
 	@PostMapping(value="/add",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<?> addProduct(@RequestParam String productName , @RequestParam String description,@RequestParam Double price ,@RequestParam String categoryName,@RequestParam String brandName,@RequestPart(value = "images",required = false) List<MultipartFile> images){
+	public ResponseEntity<?> addProduct(@RequestParam String productName , @RequestParam String description,@RequestParam Double price,@RequestParam Integer stocks ,@RequestParam String categoryName,@RequestParam String brandName,@RequestParam List<String> attributeNames,@RequestParam List<String> valueNames,@RequestPart(value = "images",required = false) List<MultipartFile> images){
+		
+		if(attributeNames == null || valueNames == null || attributeNames.isEmpty() || valueNames.isEmpty()) {
+			throw new AppException("give both attribute names and attribute values",HttpStatus.BAD_REQUEST);
+		}
+		
+		if(attributeNames.size() != valueNames.size()) {
+			throw new AppException("no of attributenames does not match with attribute value", HttpStatus.BAD_REQUEST);
+		}
+		
+		List<AttributeHelperRequest> list = new ArrayList<>();
+		for(int i=0;i<attributeNames.size();i++) {
+			String attr = attributeNames.get(i);
+			String val = valueNames.get(i);
+			if(attr == null || attr.trim().isEmpty() || val == null || val.trim().isEmpty()) {
+				throw new AppException("attribute name and value name must not be empty",HttpStatus.BAD_REQUEST);
+			}
+			
+			AttributeHelperRequest req = new AttributeHelperRequest();
+			req.setAttributeName(attr.trim());
+			req.setValueName(val.trim());
+			list.add(req);
+		}
 		
 		AddProductRequest request = new AddProductRequest();
 		request.setProductName(productName);
 		request.setPrice(price);
+		request.setStocks(stocks);
 		request.setDescription(description);
 		request.setBrandName(brandName);
 		request.setCategoryName(categoryName);
+		request.setAttributes(list);
 		
 		ProductDto dto = pservice.addProduct(request,images);
 		return ResponseEntity.ok(new ApiResponse<>("product added sucessfully!",dto,HttpStatus.OK));
 	}
+	
+//	@PostMapping(value="/add",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//	public ResponseEntity<?> addProduct(@RequestPart("product") AddProductRequest request,@RequestPart(value = "images",required = false) List<MultipartFile> images){
+//		ProductDto dto = pservice.addProduct(request, images);
+//		return ResponseEntity.ok(new ApiResponse<>("product added sucessfully!",dto,HttpStatus.OK));
+//	}
 
 	@GetMapping("/get/{productId}")
 	public ResponseEntity<?> getProductById(@PathVariable Integer productId){
@@ -74,11 +107,10 @@ public class ProductController {
 	}
 	
 	@PutMapping(value="/update/{productId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<?> updateProduct(@PathVariable Integer productId,@RequestParam String productName ,@RequestParam String description,@RequestParam Double price ,@RequestParam String categoryName,@RequestParam String brandName,@RequestPart(value = "images",required = false) List<MultipartFile> images){
+	public ResponseEntity<?> updateProduct(@PathVariable Integer productId,@RequestParam String productName ,@RequestParam String description,@RequestParam String categoryName,@RequestParam String brandName,@RequestPart(value = "images",required = false) List<MultipartFile> images){
 		
 		UpdateProductRequest request = new UpdateProductRequest();
 		request.setProductName(productName);
-		request.setPrice(price);
 		request.setDescription(description);
 		request.setBrandName(brandName);
 		request.setCategoryName(categoryName);
