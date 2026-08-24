@@ -1,7 +1,9 @@
 package com.product.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -58,6 +60,39 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 			throw new AppException("stocks must be non negative", HttpStatus.BAD_REQUEST);
 		}
 		
+//		if(request.getAttributes() == null || request.getAttributes().size() < 2) {
+//			throw new AppException("there must be atleast 2 variants!", HttpStatus.BAD_REQUEST);
+//		}
+		
+		
+		//request pairs
+		
+		List<AttributeValue> reqAttributes = new ArrayList<>();
+		Set<Integer> reqId = new HashSet<>();
+		
+		if(request.getAttributes() != null && !request.getAttributes().isEmpty()) {
+			for(AttributeHelperRequest pair : request.getAttributes()) {	
+				AttributeValue v = arepo.findByProductAttributeAttributeNameIgnoreCaseAndValueNameIgnoreCase(pair.getAttributeName(),pair.getValueName()).orElseThrow(() -> new AppException("no attribute pair found!",HttpStatus.NOT_FOUND));
+			    
+				reqAttributes.add(v);
+				reqId.add(v.getValueId());
+			}
+		}
+		
+		//confirm with already existing product variants
+		
+		if(!reqId.isEmpty() && product.getVariants() != null) {
+			for(ProductVariant existing : product.getVariants()) {
+				if(existing.getVariantValues() != null) {
+					Set<Integer> existId = existing.getVariantValues().stream().map((vv)->vv.getAttributeValue().getValueId()).collect(Collectors.toSet());
+				   
+					if(existId.equals(reqId)) {
+						throw new AppException("already variant exist for this product!",HttpStatus.BAD_REQUEST);
+					}
+				}
+			}
+		}
+		
 		ProductVariant variant = new ProductVariant();
 		variant.setPrice(request.getPrice());
 		variant.setStocks(request.getStocks());
@@ -65,17 +100,14 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 		variant.setSku(SkuGenerator.generateSku(product.getBrand().getBrandName(),product.getCategory().getCategoryName()));
 		
 		List<VariantValue> values = new ArrayList<>();
-		
-		if(request.getAttributes() != null && !request.getAttributes().isEmpty()) {
-			for(AttributeHelperRequest pair : request.getAttributes()) {	
-				AttributeValue v = arepo.findByProductAttributeAttributeNameIgnoreCaseAndValueNameIgnoreCase(pair.getAttributeName(),pair.getValueName()).orElseThrow(() -> new AppException("no attribute pair found!",HttpStatus.NOT_FOUND));
+			for(AttributeValue v : reqAttributes) {	
 			
 				VariantValue vv = new VariantValue();
 				vv.setProductVariant(variant);
 				vv.setAttributeValue(v);
 				values.add(vv);
 			}
-		}
+		
 		
 		variant.setVariantValues(values);
 		
@@ -98,7 +130,6 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 		
 		return dto;
 	}
-
 	
 	@Override
 	@Transactional

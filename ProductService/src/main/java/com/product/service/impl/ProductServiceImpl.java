@@ -68,6 +68,10 @@ public class ProductServiceImpl implements ProductService {
 		if(request.getAttributes() == null || request.getAttributes().isEmpty()) {
 			throw new AppException("provide attribute pair for the variant",HttpStatus.BAD_REQUEST);
 		}
+		
+//		if(request.getAttributes() == null || request.getAttributes().size() < 2) {
+//			throw new AppException("there must be atleast 2 variants!", HttpStatus.BAD_REQUEST);
+//		}
 
 		Product p = new Product();
 		p.setProductName(request.getProductName().trim());
