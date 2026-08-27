@@ -14,5 +14,9 @@ public class CategoryDto {
 	private String imageUrl;
 	
 	private String publicUrl;
+	
+	private Integer parentCategoryId;
+	
+	private String parentCategoryName;
 
 }

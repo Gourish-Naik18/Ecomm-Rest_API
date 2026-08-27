@@ -16,6 +16,8 @@ public interface CategoryService {
 	
 	List<CategoryDto> getAllCategories();
 	
+	List<CategoryDto> getSubCategories(String parentCategoryName);
+	
 	CategoryDto UpdateCategory(Integer categoryId,UpdateCategoryRequest request,MultipartFile image);
 	
 	void deleteCategoryById(Integer categoryId);

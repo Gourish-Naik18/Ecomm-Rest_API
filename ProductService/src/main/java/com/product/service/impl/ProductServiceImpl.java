@@ -65,9 +65,9 @@ public class ProductServiceImpl implements ProductService {
 		Category c = crepo.findByCategoryName(request.getCategoryName())
 				.orElseThrow(() -> new AppException("no Category found!", HttpStatus.NOT_FOUND));
 		
-		if(request.getAttributes() == null || request.getAttributes().isEmpty()) {
-			throw new AppException("provide attribute pair for the variant",HttpStatus.BAD_REQUEST);
-		}
+//		if(request.getAttributes() == null || request.getAttributes().isEmpty()) {
+//			throw new AppException("provide attribute pair for the variant",HttpStatus.BAD_REQUEST);
+//		}
 		
 //		if(request.getAttributes() == null || request.getAttributes().size() < 2) {
 //			throw new AppException("there must be atleast 2 variants!", HttpStatus.BAD_REQUEST);
@@ -86,22 +86,29 @@ public class ProductServiceImpl implements ProductService {
 			uploaded = pservice.uploadImages(saved.getProductId(), images);
 		}
 
-		List<ProductVariantDto> variants = new ArrayList<>();
-		if (request.getPrice() != null && request.getStocks() != null) {
-			AddProductVariantRequest variantRequest = new AddProductVariantRequest();
-			variantRequest.setPrice(request.getPrice());
-			variantRequest.setStocks(request.getStocks());
-			variantRequest.setAttributes(request.getAttributes());
-
-			ProductVariantDto createdVariant = pvservice.addProductVariant(saved.getProductId(), variantRequest);
-			variants.add(createdVariant);
-		}
+//		List<ProductVariantDto> variants = new ArrayList<>();
+//		if (request.getPrice() != null && request.getStocks() != null) {
+//			AddProductVariantRequest variantRequest = new AddProductVariantRequest();
+//			variantRequest.setPrice(request.getPrice());
+//			variantRequest.setStocks(request.getStocks());
+//			variantRequest.setAttributes(request.getAttributes());
+//
+//			ProductVariantDto createdVariant = pvservice.addProductVariant(saved.getProductId(), variantRequest);
+//			variants.add(createdVariant);
+//		}
 
 		ProductDto dto = mapper.map(saved, ProductDto.class);
 		dto.setBrandDto(mapper.map(b, BrandDto.class));
-		dto.setCategoryDto(mapper.map(c, CategoryDto.class));
+		
+		CategoryDto dt = mapper.map(c,CategoryDto.class);
+		if(c.getParentCategory() != null) {
+			dt.setParentCategoryId(c.getParentCategory().getCategoryId());
+			dt.setParentCategoryName(c.getParentCategory().getCategoryName());
+		}
+		dto.setCategoryDto(dt);
+		
 		dto.setProductImageDto(uploaded);
-		dto.setVariants(variants);
+		dto.setVariants(new ArrayList<>());
 		return dto;
 	}
 
@@ -113,7 +120,15 @@ public class ProductServiceImpl implements ProductService {
 				.orElseThrow(() -> new AppException("no product found!", HttpStatus.NOT_FOUND));
 		ProductDto dto = mapper.map(p, ProductDto.class);
 		dto.setBrandDto(mapper.map(p.getBrand(), BrandDto.class));
-		dto.setCategoryDto(mapper.map(p.getCategory(), CategoryDto.class));
+		
+		CategoryDto dt = mapper.map(p.getCategory(),CategoryDto.class);
+		if(p.getCategory().getParentCategory() != null) {
+			dt.setParentCategoryId(p.getCategory().getParentCategory().getCategoryId());
+			dt.setParentCategoryName(p.getCategory().getParentCategory().getCategoryName());
+		}
+		dto.setCategoryDto(dt);
+		
+		
 
 		if (p.getProductImages() != null) {
 			List<ProductImageDto> li = p.getProductImages().stream().map((pi) -> mapper.map(pi, ProductImageDto.class))
@@ -144,8 +159,16 @@ public class ProductServiceImpl implements ProductService {
 		return list.stream().map((p) -> {
 			ProductDto dto = mapper.map(p, ProductDto.class);
 			dto.setBrandDto(mapper.map(p.getBrand(), BrandDto.class));
-			dto.setCategoryDto(mapper.map(p.getCategory(), CategoryDto.class));
+			
+			
+			CategoryDto dt = mapper.map(p.getCategory(),CategoryDto.class);
+			if(p.getCategory().getParentCategory() != null) {
+				dt.setParentCategoryId(p.getCategory().getParentCategory().getCategoryId());
+				dt.setParentCategoryName(p.getCategory().getParentCategory().getCategoryName());
+			}
+			dto.setCategoryDto(dt);
 
+			
 			if (p.getProductImages() != null) {
 				List<ProductImageDto> li = p.getProductImages().stream()
 						.map((pi) -> mapper.map(pi, ProductImageDto.class)).collect(Collectors.toList());
@@ -172,7 +195,13 @@ public class ProductServiceImpl implements ProductService {
 		return list.stream().map((p) -> {
 			ProductDto dto = mapper.map(p, ProductDto.class);
 			dto.setBrandDto(mapper.map(p.getBrand(), BrandDto.class));
-			dto.setCategoryDto(mapper.map(p.getCategory(), CategoryDto.class));
+			
+			CategoryDto dt = mapper.map(p.getCategory(),CategoryDto.class);
+			if(p.getCategory().getParentCategory() != null) {
+				dt.setParentCategoryId(p.getCategory().getParentCategory().getCategoryId());
+				dt.setParentCategoryName(p.getCategory().getParentCategory().getCategoryName());
+			}
+			dto.setCategoryDto(dt);
 
 			if (p.getProductImages() != null) {
 				List<ProductImageDto> li = p.getProductImages().stream()
@@ -200,7 +229,15 @@ public class ProductServiceImpl implements ProductService {
 		return list.stream().map((p) -> {
 			ProductDto dto = mapper.map(p, ProductDto.class);
 			dto.setBrandDto(mapper.map(p.getBrand(), BrandDto.class));
-			dto.setCategoryDto(mapper.map(p.getCategory(), CategoryDto.class));
+			
+			
+			CategoryDto dt = mapper.map(p.getCategory(),CategoryDto.class);
+			if(p.getCategory().getParentCategory() != null) {
+				dt.setParentCategoryId(p.getCategory().getParentCategory().getCategoryId());
+				dt.setParentCategoryName(p.getCategory().getParentCategory().getCategoryName());
+			}
+			dto.setCategoryDto(dt);
+			
 
 			if (p.getProductImages() != null) {
 				List<ProductImageDto> li = p.getProductImages().stream()
@@ -240,7 +277,15 @@ public class ProductServiceImpl implements ProductService {
 
 		ProductDto dto = mapper.map(saved, ProductDto.class);
 		dto.setBrandDto(mapper.map(b, BrandDto.class));
-		dto.setCategoryDto(mapper.map(c, CategoryDto.class));
+		
+		
+		CategoryDto dt = mapper.map(c,CategoryDto.class);
+		if(c.getParentCategory() != null) {
+			dt.setParentCategoryId(c.getParentCategory().getCategoryId());
+			dt.setParentCategoryName(c.getParentCategory().getCategoryName());
+		}
+		dto.setCategoryDto(dt);
+		
 
 		List<ProductImageDto> pdto = pservice.getImagesByProductId(saved.getProductId());
 		if (pdto != null) {

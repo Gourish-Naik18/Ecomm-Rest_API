@@ -18,7 +18,7 @@ public class AddProductRequest {
 	
 //	@NotNull(message = "price cannot be empty")
 //	@Positive(message = "price must be greater then zero")
-	private Double price;
+//	private Double price;
 	
 //	@NotBlank(message = "category name cannot be empty")
 	private String categoryName;
@@ -26,8 +26,8 @@ public class AddProductRequest {
 //	@NotBlank(message = "brand name cannot be empty")
 	private String brandName;
 	
-	private Integer stocks;
+//	private Integer stocks;
 	
-	private List<AttributeHelperRequest> attributes;
+//	private List<AttributeHelperRequest> attributes;
 
 }

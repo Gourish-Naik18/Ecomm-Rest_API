@@ -11,5 +11,7 @@ public class UpdateCategoryRequest {
 	
 //	@NotBlank(message = "description cannot be empty")
 	private String description;
+	
+	private String parentCategoryName;
 
 }
