@@ -17,18 +17,18 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class VariantValue {
+public class VariantAttribute {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer variantValueId;
+	private Integer variantAttributeId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_variant_id")
 	private ProductVariant productVariant;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "value_id")
-	private AttributeValue attributeValue;
+	@JoinColumn(name = "attribute_id")
+	private ProductAttribute productAttribute;
 
 }

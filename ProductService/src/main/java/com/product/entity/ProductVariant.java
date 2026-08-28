@@ -33,14 +33,14 @@ public class ProductVariant {
 	
 	private Double price;
 	
-	private Integer stocks;
+//	private Integer stocks;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_id")
 	private Product product;
 	
 	@OneToMany(mappedBy = "productVariant",cascade = CascadeType.ALL,orphanRemoval = true)
-	private List<VariantValue> variantValues;
+	private List<VariantAttribute> variantAttributes;
 	
 	
 	

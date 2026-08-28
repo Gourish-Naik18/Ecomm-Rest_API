@@ -15,12 +15,11 @@ public class AddProductVariantRequest {
 	@Positive(message = "price must be greater the zero")
 	private Double price;
 	
-	@NotNull(message = "stocks is required")
-	@Positive(message = "stocks cannot be negative")
-	private Integer stocks;
+//	@NotNull(message = "stocks is required")
+//	@Positive(message = "stocks cannot be negative")
+//	private Integer stocks;
 	
-	@NotEmpty(message = "atleast one attribute pair is required for the variant")
-	@Valid
-	private List<AttributeHelperRequest> attributes;
+	@NotEmpty(message = "atleast one attribute name is required for the variant")
+	private List<String> attributeNames;
 
 }

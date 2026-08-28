@@ -19,9 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.product.dto.ProductDto;
-import com.product.exception.AppException;
 import com.product.request.AddProductRequest;
-import com.product.request.AttributeHelperRequest;
 import com.product.request.UpdateProductRequest;
 import com.product.response.ApiResponse;
 import com.product.service.ProductImageService;

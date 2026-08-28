@@ -13,8 +13,8 @@ public class ProductVariantDto {
 	
 	private Double price;
 	
-	private Integer stocks;
+//	private Integer stocks;
 	
-	private List<VariantValueDto> variantValues;
+	private List<VariantAttributeDto> variantAttributes;
 
 }

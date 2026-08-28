@@ -14,7 +14,7 @@ public class UpdateProductVariantRequest {
 	@Positive(message = "price must be greater the zero")
 	private Double price;
 	
-	@Positive(message = "stocks cannot be negative")
-	private Integer stocks;
+//	@Positive(message = "stocks cannot be negative")
+//	private Integer stocks;
 
 }
