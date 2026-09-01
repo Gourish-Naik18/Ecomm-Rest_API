@@ -39,8 +39,11 @@ public class ProductVariant {
 	@JoinColumn(name = "product_id")
 	private Product product;
 	
-	@OneToMany(mappedBy = "productVariant",cascade = CascadeType.ALL,orphanRemoval = true)
-	private List<VariantAttribute> variantAttributes;
+//	@OneToMany(mappedBy = "productVariant",cascade = CascadeType.ALL,orphanRemoval = true)
+//	private List<VariantAttribute> variantAttributes;
+	
+	@OneToMany(mappedBy = "productVariant", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<VariantValue> variantValues;
 	
 	
 	

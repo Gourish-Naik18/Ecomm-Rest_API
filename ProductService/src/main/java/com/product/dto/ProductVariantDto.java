@@ -15,6 +15,8 @@ public class ProductVariantDto {
 	
 //	private Integer stocks;
 	
-	private List<VariantAttributeDto> variantAttributes;
+//	private List<VariantAttributeDto> variantAttributes;
+	
+	private List<VariantValueDto> variantValues;
 
 }

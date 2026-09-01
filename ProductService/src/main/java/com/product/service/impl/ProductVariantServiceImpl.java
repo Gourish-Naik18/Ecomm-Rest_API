@@ -12,18 +12,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.product.dto.AttributeValueDto;
 import com.product.dto.ProductAttributeDto;
 import com.product.dto.ProductVariantDto;
-import com.product.dto.VariantAttributeDto;
+import com.product.dto.VariantValueDto;
+import com.product.entity.AttributeValue;
 import com.product.entity.Product;
 import com.product.entity.ProductAttribute;
 import com.product.entity.ProductVariant;
-import com.product.entity.VariantAttribute;
+import com.product.entity.VariantValue;
 import com.product.exception.AppException;
+import com.product.repo.AttributeValueRepo;
 import com.product.repo.ProductAttributeRepo;
 import com.product.repo.ProductRepo;
 import com.product.repo.ProductVariantRepo;
 import com.product.request.AddProductVariantRequest;
+import com.product.request.AttributeHelperRequest;
 import com.product.request.UpdateProductVariantRequest;
 import com.product.service.ProductVariantService;
 import com.product.utility.SkuGenerator;
@@ -39,6 +43,9 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
 	@Autowired
 	private ProductAttributeRepo parepo;
+	
+	@Autowired
+	private AttributeValueRepo avrepo;
 
 	@Autowired
 	private ProductRepo prepo;
@@ -64,29 +71,30 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
 		// request pairs
 
-		List<ProductAttribute> reqAttributes = new ArrayList<>();
-		Set<Integer> reqId = new HashSet<>();
+//		List<ProductAttribute> reqAttributes = new ArrayList<>();
+		List<AttributeValue> reqValues = new ArrayList<>();
+		Set<Integer> reqValueIds = new HashSet<>();
 
-		if (request.getAttributeNames() != null && !request.getAttributeNames().isEmpty()) {
-			for (String attrName : request.getAttributeNames()) {
-				ProductAttribute pa = parepo.findByAttributeNameIgnoreCase(attrName.trim())
-						.orElseThrow(() -> new AppException("no attribute found!", HttpStatus.NOT_FOUND));
+		if (request.getAttributes() != null && !request.getAttributes().isEmpty()) {
+			for (AttributeHelperRequest pair : request.getAttributes()) {
+				AttributeValue val = avrepo.findByProductAttributeAttributeNameIgnoreCaseAndValueNameIgnoreCase(pair.getAttributeName().trim(), pair.getValueName().trim()).orElseThrow(() -> new AppException("no attribute value pair found!", HttpStatus.BAD_REQUEST));
 
-				reqAttributes.add(pa);
-				reqId.add(pa.getAttributeId());
+				reqValues.add(val);
+				reqValueIds.add(val.getValueId());
 			}
 		}
 
 		// confirm with already existing product variants
 
-		if (!reqId.isEmpty() && product.getVariants() != null) {
+		if (!reqValueIds.isEmpty() && product.getVariants() != null) {
 			for (ProductVariant existing : product.getVariants()) {
-				if (existing.getVariantAttributes() != null) {
-					Set<Integer> existId = existing.getVariantAttributes().stream()
-							.map((va) -> va.getProductAttribute().getAttributeId()).collect(Collectors.toSet());
+				if (existing.getVariantValues() != null) {
+					Set<Integer> existValueIds = existing.getVariantValues().stream()
+							.map(vv -> vv.getAttributeValue().getValueId())
+							.collect(Collectors.toSet());
 
-					if (existId.equals(reqId)) {
-						throw new AppException("already variant exist for this product!", HttpStatus.BAD_REQUEST);
+					if (existValueIds.equals(reqValueIds)) {
+						throw new AppException("variant already exists with this combination of values!", HttpStatus.BAD_REQUEST);
 					}
 				}
 			}
@@ -99,30 +107,33 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 		variant.setSku(
 				SkuGenerator.generateSku(product.getBrand().getBrandName(), product.getCategory().getCategoryName()));
 
-		List<VariantAttribute> values = new ArrayList<>();
-		for (ProductAttribute v : reqAttributes) {
-
-			VariantAttribute vv = new VariantAttribute();
+		List<VariantValue> variantValues = new ArrayList<>();
+		for (AttributeValue val : reqValues) {
+			VariantValue vv = new VariantValue();
 			vv.setProductVariant(variant);
-			vv.setProductAttribute(v);
-			values.add(vv);
+			vv.setAttributeValue(val);
+			variantValues.add(vv);
 		}
 
-		variant.setVariantAttributes(values);
+		variant.setVariantValues(variantValues);
 
 		ProductVariant saved = pvrepo.save(variant);
 		ProductVariantDto dto = mapper.map(saved, ProductVariantDto.class);
 
-		if (saved.getVariantAttributes() != null) {
-			List<VariantAttributeDto> valueDto = saved.getVariantAttributes().stream().map((vv) -> {
-				VariantAttributeDto dt = new VariantAttributeDto();
-				dt.setVariantAttributeId(vv.getVariantAttributeId());
+		if (saved.getVariantValues() != null) {
+			List<VariantValueDto> valueDtos = saved.getVariantValues().stream().map(vv -> {
+				VariantValueDto vvDto = new VariantValueDto();
+				vvDto.setVariantValueId(vv.getVariantValueId());
 
-				dt.setProductAttribute(mapper.map(vv.getProductAttribute(), ProductAttributeDto.class));
-				return dt;
+				AttributeValueDto avDto = mapper.map(vv.getAttributeValue(), AttributeValueDto.class);
+				if (vv.getAttributeValue().getProductAttribute() != null) {
+					avDto.setProductAttribute(mapper.map(vv.getAttributeValue().getProductAttribute(), ProductAttributeDto.class));
+				}
+				vvDto.setAttributeValue(avDto);
+				return vvDto;
 			}).collect(Collectors.toList());
 
-			dto.setVariantAttributes(valueDto);
+			dto.setVariantValues(valueDtos);
 		}
 
 		return dto;
@@ -154,16 +165,20 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 		ProductVariant updated = pvrepo.save(variant);
 		ProductVariantDto dto = mapper.map(updated, ProductVariantDto.class);
 
-		if (updated.getVariantAttributes() != null) {
-			List<VariantAttributeDto> valueDto = updated.getVariantAttributes().stream().map((vv) -> {
-				VariantAttributeDto dt = new VariantAttributeDto();
-				dt.setVariantAttributeId(vv.getVariantAttributeId());
+		if (updated.getVariantValues() != null) {
+			List<VariantValueDto> valueDtos = updated.getVariantValues().stream().map(vv -> {
+				VariantValueDto vvDto = new VariantValueDto();
+				vvDto.setVariantValueId(vv.getVariantValueId());
 
-				dt.setProductAttribute(mapper.map(vv.getProductAttribute(), ProductAttributeDto.class));
-				return dt;
+				AttributeValueDto avDto = mapper.map(vv.getAttributeValue(), AttributeValueDto.class);
+				if (vv.getAttributeValue().getProductAttribute() != null) {
+					avDto.setProductAttribute(mapper.map(vv.getAttributeValue().getProductAttribute(), ProductAttributeDto.class));
+				}
+				vvDto.setAttributeValue(avDto);
+				return vvDto;
 			}).collect(Collectors.toList());
 
-			dto.setVariantAttributes(valueDto);
+			dto.setVariantValues(valueDtos);
 		}
 
 		return dto;
@@ -179,16 +194,20 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 		return pvrepo.findByProductProductId(productId).stream().map((v) -> {
 			ProductVariantDto dto = mapper.map(v, ProductVariantDto.class);
 
-			if (v.getVariantAttributes() != null) {
-				List<VariantAttributeDto> valueDto = v.getVariantAttributes().stream().map((vv) -> {
-					VariantAttributeDto dt = new VariantAttributeDto();
-					dt.setVariantAttributeId(vv.getVariantAttributeId());
+			if (v.getVariantValues() != null) {
+				List<VariantValueDto> valueDtos = v.getVariantValues().stream().map(vv -> {
+					VariantValueDto vvDto = new VariantValueDto();
+					vvDto.setVariantValueId(vv.getVariantValueId());
 
-					dt.setProductAttribute(mapper.map(vv.getProductAttribute(), ProductAttributeDto.class));
-					return dt;
+					AttributeValueDto avDto = mapper.map(vv.getAttributeValue(), AttributeValueDto.class);
+					if (vv.getAttributeValue().getProductAttribute() != null) {
+						avDto.setProductAttribute(mapper.map(vv.getAttributeValue().getProductAttribute(), ProductAttributeDto.class));
+					}
+					vvDto.setAttributeValue(avDto);
+					return vvDto;
 				}).collect(Collectors.toList());
 
-				dto.setVariantAttributes(valueDto);
+				dto.setVariantValues(valueDtos);
 			}
 			return dto;
 		}).collect(Collectors.toList());
@@ -202,16 +221,20 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 				.orElseThrow(() -> new AppException("no variant found with sku", HttpStatus.NOT_FOUND));
 		ProductVariantDto dto = mapper.map(variant, ProductVariantDto.class);
 
-		if (variant.getVariantAttributes() != null) {
-			List<VariantAttributeDto> valueDto = variant.getVariantAttributes().stream().map((vv) -> {
-				VariantAttributeDto dt = new VariantAttributeDto();
-				dt.setVariantAttributeId(vv.getVariantAttributeId());
+		if (variant.getVariantValues() != null) {
+			List<VariantValueDto> valueDtos = variant.getVariantValues().stream().map(vv -> {
+				VariantValueDto vvDto = new VariantValueDto();
+				vvDto.setVariantValueId(vv.getVariantValueId());
 
-				dt.setProductAttribute(mapper.map(vv.getProductAttribute(), ProductAttributeDto.class));
-				return dt;
+				AttributeValueDto avDto = mapper.map(vv.getAttributeValue(), AttributeValueDto.class);
+				if (vv.getAttributeValue().getProductAttribute() != null) {
+					avDto.setProductAttribute(mapper.map(vv.getAttributeValue().getProductAttribute(), ProductAttributeDto.class));
+				}
+				vvDto.setAttributeValue(avDto);
+				return vvDto;
 			}).collect(Collectors.toList());
 
-			dto.setVariantAttributes(valueDto);
+			dto.setVariantValues(valueDtos);
 		}
 
 		return dto;

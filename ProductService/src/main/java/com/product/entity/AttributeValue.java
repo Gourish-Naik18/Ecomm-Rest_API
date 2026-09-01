@@ -33,7 +33,7 @@ public class AttributeValue {
 	@JoinColumn(name = "attribute_id")
 	private ProductAttribute productAttribute;
 	
-//	@OneToMany(mappedBy = "attributeValue",cascade = CascadeType.ALL)
-//	private List<VariantValue> variantValues;
+	@OneToMany(mappedBy = "attributeValue",cascade = CascadeType.ALL)
+	private List<VariantValue> variantValues;
 
 }

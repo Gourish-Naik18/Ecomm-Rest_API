@@ -87,9 +87,8 @@ public class ProductAttributeServiceImpl implements ProductAttributeService {
 		ProductAttribute attribute = prepo.findById(attributeId)
 				.orElseThrow(() -> new AppException("no attribute found!", HttpStatus.NOT_FOUND));
 
-		if ((attribute.getAttributeValues() != null && !attribute.getAttributeValues().isEmpty())
-				|| (attribute.getVariantAttributes() != null && !attribute.getVariantAttributes().isEmpty())) {
-			throw new AppException("cannot delete attribute", HttpStatus.BAD_REQUEST);
+		if (attribute.getAttributeValues() != null && !attribute.getAttributeValues().isEmpty()) {
+			throw new AppException("cannot delete attribute: linked to existing values", HttpStatus.BAD_REQUEST);
 		}
 
 		prepo.delete(attribute);

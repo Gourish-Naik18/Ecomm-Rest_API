@@ -110,9 +110,9 @@ public class AttributeValueServiceImpl implements AttributeValueService {
 		AttributeValue value = arepo.findById(valueId)
 				.orElseThrow(() -> new AppException("no attributevalue found!", HttpStatus.NOT_FOUND));
 
-//		if(value.getVariantValues() != null && !value.getVariantValues().isEmpty()) {
-//			throw new AppException("cannot delete attribute value!",HttpStatus.BAD_REQUEST);
-//		}
+		if(value.getVariantValues() != null && !value.getVariantValues().isEmpty()) {
+			throw new AppException("cannot delete attribute value!",HttpStatus.BAD_REQUEST);
+		}
 
 		arepo.delete(value);
 	}
