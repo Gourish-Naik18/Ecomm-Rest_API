@@ -28,6 +28,7 @@ import com.product.request.AddProductRequest;
 import com.product.request.AddProductVariantRequest;
 import com.product.request.UpdateProductRequest;
 import com.product.service.CloudinaryService;
+import com.product.service.MailSender;
 import com.product.service.ProductImageService;
 import com.product.service.ProductService;
 import com.product.service.ProductVariantService;
@@ -55,6 +56,9 @@ public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	private ProductVariantService pvservice;
+	
+	@Autowired
+	private MailSender mail;
 
 	@Override
 	@Transactional
@@ -80,6 +84,7 @@ public class ProductServiceImpl implements ProductService {
 		p.setCategory(c);
 
 		Product saved = prepo.save(p);
+		mail.sendMail("gourishnaik1477@gmail.com","Product Added Sucessfully!","product: "+saved.getProductName()+" is added");
 
 		List<ProductImageDto> uploaded = new ArrayList<>();
 		if (images != null && !images.isEmpty()) {

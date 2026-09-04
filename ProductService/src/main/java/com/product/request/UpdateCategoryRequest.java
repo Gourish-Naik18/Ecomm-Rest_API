@@ -13,5 +13,7 @@ public class UpdateCategoryRequest {
 	private String description;
 	
 	private String parentCategoryName;
+	
+	private String status;
 
 }

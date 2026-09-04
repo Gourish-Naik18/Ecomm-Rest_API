@@ -35,10 +35,12 @@ public class CategoryController {
 	public ResponseEntity<?> addCategory(@RequestParam String categoryName,
 			@RequestParam String description,
 			@RequestParam(required = false) String parentCategoryName,
+			@RequestParam(value = "status",defaultValue="ACTIVE") String status,
 			@RequestPart(value = "image",required = false) MultipartFile image){
 		AddCategoryRequest request = new AddCategoryRequest();
 		request.setCategoryName(categoryName);
 		request.setDescription(description);
+		request.setStatus(status);
 		request.setParentCategoryName(parentCategoryName);
 		CategoryDto dto = cservice.addCategory(request, image);
 		return ResponseEntity.ok(new ApiResponse<>("category added sucessfully!",dto,HttpStatus.OK));
@@ -64,11 +66,12 @@ public class CategoryController {
 	
 	
 	@PutMapping(value="/update/{categoryId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<?> updateCategory(@PathVariable Integer categoryId,@RequestParam String categoryName,@RequestParam String description,@RequestParam(required = false) String parentCategoryName,@RequestPart(value="image",required = false) MultipartFile image){
+	public ResponseEntity<?> updateCategory(@PathVariable Integer categoryId,@RequestParam String categoryName,@RequestParam String description,@RequestParam(required = false) String parentCategoryName,@RequestParam String status,@RequestPart(value="image",required = false) MultipartFile image){
 		UpdateCategoryRequest request = new UpdateCategoryRequest();
 		request.setCategoryName(categoryName);
 		request.setDescription(description);
 		request.setParentCategoryName(parentCategoryName);
+		request.setStatus(status);
 		CategoryDto dto = cservice.UpdateCategory(categoryId, request, image);
 		return ResponseEntity.ok(new ApiResponse<>("updated sucessfully!",dto,HttpStatus.OK));
 	}

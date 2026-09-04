@@ -1,6 +1,9 @@
 package com.product.entity;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -14,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +42,21 @@ public class Category {
 	private String imageUrl;
 	
 	private String publicUrl;
+	
+	
+	@CreationTimestamp
+	@Column(updatable = false)
+	private LocalDateTime createdAt;
+	
+	private LocalDateTime updatedAt;
+	
+	private String status = "ACTIVE";
+	
+	@PreUpdate
+	public void setUpdatedAt() {
+		this.updatedAt = LocalDateTime.now();
+	}
+	
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "parent_category_id")

@@ -36,6 +36,7 @@ public class BrandController {
 	
 	@PostMapping(value="/add",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> addBrand(@RequestParam String brandName,
+			       @RequestParam String about , @RequestParam(value = "status",defaultValue="ACTIVE") String status,
 			       @RequestPart(value="image",required = false) MultipartFile image){
 //		
 //		if(result.hasErrors()) {
@@ -44,6 +45,8 @@ public class BrandController {
 		
 		AddBrandRequest request = new AddBrandRequest();
 		request.setBrandName(brandName);
+		request.setAbout(about);
+		request.setStatus(status);
 		BrandDto dto = bservice.addBrand(request, image);
 		return ResponseEntity.ok(new ApiResponse<>("brand added sucessfully!",dto,HttpStatus.OK));
 	}
@@ -61,7 +64,7 @@ public class BrandController {
 	}
 	
 	@PutMapping(value="/update/{brandId}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<?> updateBrand(@PathVariable Integer brandId,@RequestParam String brandName,@RequestPart(value="image",required = false) MultipartFile image){
+	public ResponseEntity<?> updateBrand(@PathVariable Integer brandId,@RequestParam String brandName,@RequestParam String about , @RequestParam String status,@RequestPart(value="image",required = false) MultipartFile image){
 		
 //		if(result.hasErrors()) {
 //			throw new AppException(result.getFieldError().getDefaultMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -69,6 +72,8 @@ public class BrandController {
 		
 		UpdateBrandRequest request = new UpdateBrandRequest();
 		request.setBrandName(brandName);
+		request.setAbout(about);
+		request.setStatus(status);
 		BrandDto dto = bservice.updateBrand(brandId, request, image);
 		return ResponseEntity.ok(new ApiResponse<>("updated sucessfully!",dto,HttpStatus.OK));
 	}

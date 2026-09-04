@@ -1,5 +1,7 @@
 package com.product.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.Data;
 
 @Data
@@ -14,6 +16,10 @@ public class CategoryDto {
 	private String imageUrl;
 	
 	private String publicUrl;
+	
+	private String status;
+	
+	private LocalDateTime createdAt;
 	
 	private Integer parentCategoryId;
 	

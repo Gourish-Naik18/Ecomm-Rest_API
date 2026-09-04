@@ -13,5 +13,7 @@ public class AddCategoryRequest {
 	private String description;
 	
 	private String parentCategoryName;
+	
+	private String status = "ACTIVE";
 
 }
